@@ -17,7 +17,7 @@ namespace OpenAuth.Mvc
                .UseServiceProviderFactory(new AutofacServiceProviderFactory())   //将默认ServiceProviderFactory指定为AutofacServiceProviderFactory
                 .ConfigureWebHostDefaults(webBuilder =>
             {
-                webBuilder.UseUrls("http://*:1802").UseStartup<Startup>();
+                webBuilder.UseUrls("http://*:1803").UseStartup<Startup>();
             });
 
     }
