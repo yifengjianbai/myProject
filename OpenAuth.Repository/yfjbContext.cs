@@ -3,10 +3,10 @@ using OpenAuth.Repository.Domain;
 
 namespace OpenAuth.Repository
 {
-    public partial class OpenAuthDBContext : DbContext
+    public partial class yfjbContext : DbContext
     {
 
-        public OpenAuthDBContext(DbContextOptions<OpenAuthDBContext> options)
+        public yfjbContext(DbContextOptions<yfjbContext> options)
             : base(options)
         {}
         

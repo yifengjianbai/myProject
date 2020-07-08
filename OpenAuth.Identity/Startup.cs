@@ -71,12 +71,12 @@ namespace OpenAuth.IdentityServer
             var dbType = ((ConfigurationSection) Configuration.GetSection("AppSetting:DbType")).Value;
             if (dbType == Define.DBTYPE_SQLSERVER)
             {
-                services.AddDbContext<OpenAuthDBContext>(options =>
+                services.AddDbContext<yfjbContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("OpenAuthDBContext")));
             }
             else  //mysql
             {
-                services.AddDbContext<OpenAuthDBContext>(options =>
+                services.AddDbContext<yfjbContext>(options =>
                     options.UseMySql(Configuration.GetConnectionString("OpenAuthDBContext")));
             }
 

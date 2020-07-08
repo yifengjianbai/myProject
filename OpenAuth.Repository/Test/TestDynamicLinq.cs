@@ -15,7 +15,7 @@ namespace OpenAuth.Repository.Test
         [Test]
         public void GenerateFilter()
         {
-            var dbcontext = _autofacServiceProvider.GetService<OpenAuthDBContext>();
+            var dbcontext = _autofacServiceProvider.GetService<yfjbContext>();
             var json = @"
                 {
 	                ""Operation"": ""and"",
@@ -88,7 +88,7 @@ namespace OpenAuth.Repository.Test
                 sub
             };
 
-            var dbcontext = _autofacServiceProvider.GetService<OpenAuthDBContext>();
+            var dbcontext = _autofacServiceProvider.GetService<yfjbContext>();
 
             var query = dbcontext.Users.GenerateFilter("c",JsonHelper.Instance.Serialize(filterGroup));
             Console.WriteLine(query.Expression.ToString());

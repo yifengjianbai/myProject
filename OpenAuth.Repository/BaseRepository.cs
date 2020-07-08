@@ -11,9 +11,9 @@ namespace OpenAuth.Repository
 {
    public  class BaseRepository<T> :IRepository<T> where T :Entity
    {
-       private OpenAuthDBContext _context;
+       private yfjbContext _context;
 
-       public BaseRepository(OpenAuthDBContext context)
+       public BaseRepository(yfjbContext context)
        {
            _context = context;
        }

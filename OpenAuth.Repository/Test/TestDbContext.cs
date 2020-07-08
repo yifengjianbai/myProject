@@ -15,7 +15,7 @@ namespace OpenAuth.Repository.Test
         [Test]
         public void TestAddUser()
         {
-            var dbcontext = _autofacServiceProvider.GetService<OpenAuthDBContext>();
+            var dbcontext = _autofacServiceProvider.GetService<yfjbContext>();
             int count = dbcontext.Users.Count();
             Console.WriteLine($"添加前用户数：{count}");
             var account = "user_" + DateTime.Now.ToString("yyyy_MM_dd HH:mm:ss");
@@ -38,7 +38,7 @@ namespace OpenAuth.Repository.Test
         [Test]
         public void TestLoadMenu()
         {
-            var dbcontext = _autofacServiceProvider.GetService<OpenAuthDBContext>();
+            var dbcontext = _autofacServiceProvider.GetService<yfjbContext>();
             Stopwatch watch = Stopwatch.StartNew();
             var modules = from module in dbcontext.Modules
                 select new
@@ -54,7 +54,7 @@ namespace OpenAuth.Repository.Test
         [Test]
         public void TestLoadMenu2()
         {
-            var dbcontext = _autofacServiceProvider.GetService<OpenAuthDBContext>();
+            var dbcontext = _autofacServiceProvider.GetService<yfjbContext>();
             Stopwatch watch = Stopwatch.StartNew();
             var modules = from module in dbcontext.Set<Module>().AsNoTracking().AsQueryable()
                           select new

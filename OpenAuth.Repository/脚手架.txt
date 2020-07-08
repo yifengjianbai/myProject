@@ -1,0 +1,2 @@
+scaffold-dbcontext "server=139.9.228.230;uid=root;pwd=900306;database=yfjb" Pomelo.EntityFrameworkCore.Mysql -o dbContext -force
+Scaffold-DbContext "Server=192.168.0.171;Database=HardmanGame;User ID=sa;Password=hardman2019;" Microsoft.EntityFrameworkCore.SqlServer -o dbContext -force

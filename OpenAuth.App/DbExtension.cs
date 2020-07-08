@@ -10,9 +10,9 @@ namespace OpenAuth.App
 {
     public class DbExtension
     {
-        private OpenAuthDBContext _context;
+        private yfjbContext _context;
 
-        public DbExtension(OpenAuthDBContext context)
+        public DbExtension(yfjbContext context)
         {
             _context = context;
         }

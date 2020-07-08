@@ -11,13 +11,13 @@ namespace OpenAuth.Repository
 {
    public  class UnitWork: IUnitWork
    {
-       private OpenAuthDBContext _context;
+       private yfjbContext _context;
 
-       public UnitWork(OpenAuthDBContext context)
+       public UnitWork(yfjbContext context)
        {
            _context = context;
        }
-       public OpenAuthDBContext GetDbContext()
+       public yfjbContext GetDbContext()
        {
            return _context;
        }

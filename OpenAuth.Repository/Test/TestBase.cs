@@ -22,7 +22,7 @@ namespace OpenAuth.Repository.Test
             serviceCollection.AddOptions();
             serviceCollection.AddScoped(typeof(IRepository<>), typeof(BaseRepository<>));
 
-            serviceCollection.AddDbContext<OpenAuthDBContext>(options =>
+            serviceCollection.AddDbContext<yfjbContext>(options =>
                 options.UseSqlServer("Data Source=.;Initial Catalog=OpenAuthDB;User=sa;Password=000000;Integrated Security=True"));
 
             var builder = new ContainerBuilder();
