@@ -113,7 +113,7 @@ namespace OpenAuth.IdentityServer.Quickstart.Consent
                 grantedConsent = ConsentResponse.Denied;
 
                 // emit event
-                await _events.RaiseAsync(new ConsentDeniedEvent(User.GetSubjectId(), request.ClientId, request.ScopesRequested));
+                await _events.RaiseAsync(new ConsentDeniedEvent(User.GetSubjectId(), request.Client.ClientId, request.ScopesRequested));
             }
             // user clicked 'yes' - validate the data
             else if (model?.Button == "yes")
@@ -134,7 +134,7 @@ namespace OpenAuth.IdentityServer.Quickstart.Consent
                     };
 
                     // emit event
-                    await _events.RaiseAsync(new ConsentGrantedEvent(User.GetSubjectId(), request.ClientId, request.ScopesRequested, grantedConsent.ScopesConsented, grantedConsent.RememberConsent));
+                    await _events.RaiseAsync(new ConsentGrantedEvent(User.GetSubjectId(), request.Client.ClientId, request.ScopesRequested, grantedConsent.ScopesConsented, grantedConsent.RememberConsent));
                 }
                 else
                 {
@@ -169,7 +169,7 @@ namespace OpenAuth.IdentityServer.Quickstart.Consent
             var request = await _interaction.GetAuthorizationContextAsync(returnUrl);
             if (request != null)
             {
-                var client = await _clientStore.FindEnabledClientByIdAsync(request.ClientId);
+                var client = await _clientStore.FindEnabledClientByIdAsync(request.Client.ClientId);
                 if (client != null)
                 {
                     var resources = await _resourceStore.FindEnabledResourcesByScopeAsync(request.ScopesRequested);
@@ -184,7 +184,7 @@ namespace OpenAuth.IdentityServer.Quickstart.Consent
                 }
                 else
                 {
-                    _logger.LogError("Invalid client id: {0}", request.ClientId);
+                    _logger.LogError("Invalid client id: {0}", request.Client.ClientId);
                 }
             }
             else
