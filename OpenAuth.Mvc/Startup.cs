@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Redis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -57,6 +59,17 @@ namespace OpenAuth.Mvc
                         };
                     });
             }
+
+            //将Redis分布式缓存服务添加到服务中
+            services.AddDistributedRedisCache(options =>
+            {
+                //用于连接Redis的配置  Configuration.GetConnectionString("RedisConnectionString")读取配置信息的串
+                options.Configuration = Configuration.GetConnectionString("RedisConnectionString");
+                //Redis实例名RedisDistributedCache
+                options.InstanceName = "RedisDistributedCache";
+            });
+
+            services.AddSingleton<IDistributedCache, RedisCache>();
 
             services.Configure<CookiePolicyOptions>(options =>
             {
