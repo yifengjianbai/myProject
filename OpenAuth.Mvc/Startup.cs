@@ -68,7 +68,7 @@ namespace OpenAuth.Mvc
                 //Redis实例名RedisDistributedCache
                 options.InstanceName = "RedisDistributedCache";
             });
-
+            //单例注入 RedisCache
             services.AddSingleton<IDistributedCache, RedisCache>();
 
             services.Configure<CookiePolicyOptions>(options =>
@@ -82,7 +82,7 @@ namespace OpenAuth.Mvc
             
             services.AddControllersWithViews(option =>
             {
-                option.Filters.Add< OpenAuthFilter>();
+                option.Filters.Add<OpenAuthFilter>();
                 option.ModelBinderProviders.Insert(0, new JsonBinderProvider());
             });
 
@@ -121,6 +121,13 @@ namespace OpenAuth.Mvc
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostEnvironment env)
         {
+            //app.Use(next => 
+            //{
+            //    return new RequestDelegate(async c =>
+            //    {
+            //        await c.Response.WriteAsync("sdsd");
+            //    });
+            //});
             app.UseAuthentication();
             if (env.IsDevelopment())
             {
