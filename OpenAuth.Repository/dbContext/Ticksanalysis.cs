@@ -5,6 +5,7 @@ namespace OpenAuth.Repository.dbContext
 {
     public partial class Ticksanalysis
     {
+        public long Id { get; set; }
         public int Code { get; set; }
         public DateTime Time { get; set; }
         public float WeiBi { get; set; }
