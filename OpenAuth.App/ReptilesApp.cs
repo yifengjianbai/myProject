@@ -78,7 +78,7 @@ namespace OpenAuth.App
                         }
 
                         if (model.data.f170 == null && model.data.f191 == null)
-                        {
+                        { 
                             continue;
                         }
 
