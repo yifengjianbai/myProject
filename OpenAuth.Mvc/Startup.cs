@@ -69,7 +69,7 @@ namespace OpenAuth.Mvc
             //    options.InstanceName = "RedisDistributedCache";
             //});
             //单例注入 RedisCache
-            services.AddSingleton<IDistributedCache, RedisCache>();
+            //services.AddSingleton<IDistributedCache, RedisCache>();
 
             services.Configure<CookiePolicyOptions>(options =>
             {

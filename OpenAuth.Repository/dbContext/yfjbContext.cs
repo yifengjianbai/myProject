@@ -43,11 +43,10 @@ namespace OpenAuth.Repository.dbContext
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if (!optionsBuilder.IsConfigured)
-            {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseMySql("server=139.9.228.230;uid=yifengjianbai;pwd=900306;database=yfjb", x => x.ServerVersion("8.0.19-mysql"));
-            }
+            //if (!optionsBuilder.IsConfigured)
+            //{
+            //    optionsBuilder.UseMySql("server=localhost;uid=aaa;pwd=aaa;database=aaa", x => x.ServerVersion("8.0.19-mysql"));
+            //}
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
