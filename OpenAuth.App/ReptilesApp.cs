@@ -55,7 +55,7 @@ namespace OpenAuth.App
             yfjbContext dbContext = DatabaseHelper.GetDbInstance();
             while ((a = myStreamReader.ReadLine()) != null && IsBegin)
             {
-                Thread.Sleep(1000 * 5);
+                //Thread.Sleep(1000 * 5);
                 log.Info(a);
                 try
                 {
