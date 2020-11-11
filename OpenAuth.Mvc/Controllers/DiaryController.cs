@@ -8,12 +8,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using OpenAuth.App;
+using OpenAuth.App.Base;
 using OpenAuth.App.Interface;
 using OpenAuth.Repository.dbContext;
 
 namespace OpenAuth.Mvc.Controllers
 {
-    public class DiaryController : BaseController
+    public class DiaryController : Controller
     {
         //DiaryApp diaryApp = new DiaryApp(DatabaseHelper.GetDbInstance());
         //RedisCacheApp CacheApp;
@@ -21,42 +22,71 @@ namespace OpenAuth.Mvc.Controllers
         //{
         //CacheApp = new RedisCacheApp(cache);
         //}
-        private static bool _isOpen = false;
-        public DiaryController(IAuth authUtil) : base(authUtil)
+        private ReptilesApp ReptilesApp;
+        private TicketsBusiness TicketsBusiness;
+        public DiaryController(yfjbContext dbContext, TicketsBusiness ticketsBusiness)
         {
-
+            ReptilesApp = new ReptilesApp(dbContext);
+            TicketsBusiness = ticketsBusiness;
         }
 
-        [AllowAnonymous]
-        public string Open(bool type)
+        [HttpGet]
+        public PagingData<Tickets> GetTickets(string code, string name, int pageIndex, int pageSize)
         {
-            Result.Code = 200;
-            Result.Message = $"操作成功";
-            if (!_isOpen)
-            {
-                _isOpen = type;
-                if (_isOpen)
-                {
-                    GetTicksInfo();
-                }
-            }
-            else
-            {
-                _isOpen = type;
-                if (!_isOpen)
-                {
-                    ReptilesApp.StopAnalysis();
-                }
-            }
-            return JsonHelper.Instance.Serialize(Result);
+            var data = ReptilesApp.GetTickets(code, name, pageIndex, pageSize);
+            return data;
         }
 
-        private void GetTicksInfo()
+        [HttpPost]
+        public BaseReponse AddTicket([FromBody]Tickets ticket)
         {
-            Task.Run(() =>
+            bool res = ReptilesApp.AddTicket(ticket);
+            return new BaseReponse()
             {
-                ReptilesApp.AnalysisHtml();
-            });
+                Code = res ? 200 : -1
+            };
+        }
+
+        [HttpPost]
+        public BaseReponse DelTicket([FromBody]List<Tickets> tickets)
+        {
+            bool res = ReptilesApp.DelTicket(tickets);
+            return new BaseReponse()
+            {
+                Code = res ? 200 : -1
+            };
+        }
+
+        [HttpPost]
+        public BaseReponse StartTicket([FromBody]Tickets ticket)
+        {
+            bool res = ReptilesApp.StartTicket(ticket);
+            if (res)
+            {
+                Task.Run(() =>
+                {
+                    TicketsBusiness.StartTicket(ticket.Code);
+                    TicketsBusiness.AnalysisHtml(ticket.Code);
+                });
+            }
+            return new BaseReponse()
+            {
+                Code = res ? 200 : -1
+            };
+        }
+
+        [HttpPost]
+        public BaseReponse StopTicket([FromBody]Tickets ticket)
+        {
+            bool res = ReptilesApp.StopTicket(ticket);
+            if (res)
+            {
+                TicketsBusiness.StopTicket(ticket.Code);
+            }
+            return new BaseReponse()
+            {
+                Code = res ? 200 : -1
+            };
         }
 
         [AllowAnonymous]

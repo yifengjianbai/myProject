@@ -6,8 +6,10 @@ namespace OpenAuth.Repository.dbContext
 {
     public partial class yfjbContext : DbContext
     {
-        public yfjbContext()
+        private string _constr;
+        public yfjbContext(string constr)
         {
+            _constr = constr;
         }
 
         public yfjbContext(DbContextOptions<yfjbContext> options)
@@ -35,6 +37,7 @@ namespace OpenAuth.Repository.dbContext
         public virtual DbSet<Syslog> Syslog { get; set; }
         public virtual DbSet<Sysmessage> Sysmessage { get; set; }
         public virtual DbSet<TableDiary> TableDiary { get; set; }
+        public virtual DbSet<Tickets> Tickets { get; set; }
         public virtual DbSet<Ticksanalysis> Ticksanalysis { get; set; }
         public virtual DbSet<Uploadfile> Uploadfile { get; set; }
         public virtual DbSet<User> User { get; set; }
@@ -43,10 +46,10 @@ namespace OpenAuth.Repository.dbContext
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            //if (!optionsBuilder.IsConfigured)
-            //{
-            //    optionsBuilder.UseMySql("server=localhost;uid=aaa;pwd=aaa;database=aaa", x => x.ServerVersion("8.0.19-mysql"));
-            //}
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseMySql(_constr);
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -1537,6 +1540,21 @@ namespace OpenAuth.Repository.dbContext
                     .HasComment("类型")
                     .HasCharSet("utf8")
                     .HasCollation("utf8_general_ci");
+            });
+
+            modelBuilder.Entity<Tickets>(entity =>
+            {
+                entity.ToTable("tickets");
+
+                entity.Property(e => e.CreateTime).HasColumnType("datetime");
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasColumnType("varchar(50)")
+                    .HasCharSet("utf8")
+                    .HasCollation("utf8_general_ci");
+
+                entity.Property(e => e.Status).HasColumnType("bit(1)");
             });
 
             modelBuilder.Entity<Ticksanalysis>(entity =>

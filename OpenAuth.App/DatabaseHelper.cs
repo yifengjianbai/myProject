@@ -9,11 +9,11 @@ namespace OpenAuth.App
     {
         private static yfjbContext yfjbContext;
         private DatabaseHelper() { }
-        public static yfjbContext GetDbInstance()
+        public static yfjbContext GetDbInstance(string constr)
         {
             if (yfjbContext == null)
             {
-                yfjbContext = new yfjbContext();
+                yfjbContext = new yfjbContext(constr);
             }
             return yfjbContext;
         }

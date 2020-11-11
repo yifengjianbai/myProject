@@ -105,7 +105,11 @@ namespace OpenAuth.Mvc
             {
                 services.AddDbContext<yfjbContext>(options =>
                     options.UseMySql(Configuration.GetConnectionString("OpenAuthDBContext")));
+                services.AddDbContext<Repository.dbContext.yfjbContext>(options =>
+                    options.UseMySql(Configuration.GetConnectionString("OpenAuthDBContext")));
             }
+
+            services.AddSingleton<TicketsBusiness>();
 
             services.AddHttpClient();
             

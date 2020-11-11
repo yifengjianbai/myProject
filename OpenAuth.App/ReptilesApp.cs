@@ -11,31 +11,22 @@ using log4net;
 using log4net.Config;
 using System.Threading;
 using OpenAuth.Repository.dbContext;
+using System.Linq;
+using OpenAuth.App.Base;
 
 namespace OpenAuth.App
 {
-    public static class ReptilesApp
+    public class ReptilesApp
     {
-        private static bool IsBegin = false;
         private static ILoggerRepository repository = LogManager.CreateRepository("NETCoreRepository");
-        public static void StopAnalysis()
+        private yfjbContext _dbContext;
+
+        public ReptilesApp(yfjbContext dbContext)
         {
-            IsBegin = false;
+            _dbContext = dbContext;
         }
 
-        public static string GetWebContent(string url)
-        {
-            WebRequest wrequest = WebRequest.Create(url);
-            WebResponse wresponse = wrequest.GetResponse();
-            Stream resStream = wresponse.GetResponseStream();
-            StreamReader sr = new StreamReader(resStream, Encoding.Default);
-            string content = sr.ReadToEnd();
-            resStream.Close();
-            sr.Close();
-            return content;
-        }
-
-        private static void HttpGet(string Url, int code, string postDataStr = "")
+        private void HttpGet(string Url, int code, string postDataStr = "")
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(Url + (postDataStr == "" ? "" : "?") + postDataStr);
             request.Method = "GET";
@@ -52,11 +43,11 @@ namespace OpenAuth.App
             string a = "";
             string lastF170 = "";
             string lastF191 = "";
-            yfjbContext dbContext = DatabaseHelper.GetDbInstance();
-            while ((a = myStreamReader.ReadLine()) != null && IsBegin)
+
+            int cnt = 1;
+            while ((a = myStreamReader.ReadLine()) != null)
             {
                 //Thread.Sleep(1000 * 5);
-                log.Info(a);
                 try
                 {
                     if (a.Length > 5)
@@ -78,7 +69,7 @@ namespace OpenAuth.App
                         }
 
                         if (model.data.f170 == null && model.data.f191 == null)
-                        { 
+                        {
                             continue;
                         }
 
@@ -89,8 +80,10 @@ namespace OpenAuth.App
                             WeiBi = Convert.ToSingle(lastF191),
                             UpDown = Convert.ToSingle(lastF170)
                         };
-                        dbContext.Ticksanalysis.Add(ticksanalysis);
-                        dbContext.SaveChanges();
+
+                        _dbContext.Ticksanalysis.Add(ticksanalysis);
+                        _dbContext.SaveChanges();
+                        cnt++;
                     }
                 }
                 catch (Exception ex)
@@ -103,17 +96,116 @@ namespace OpenAuth.App
             myResponseStream.Close();
         }
 
-        public static void AnalysisHtml()
+        public void AnalysisHtml(string code)
         {
             try
             {
-                IsBegin = true;
-                HttpGet("http://51.push2.eastmoney.com/api/qt/stock/sse?ut=fa5fd1943c7b386f172d6893dbfba10b&fltt=2&fields=f120,f121,f122,f174,f175,f59,f163,f43,f57,f58,f169,f170,f46,f44,f51,f168,f47,f164,f116,f60,f45,f52,f50,f48,f167,f117,f71,f161,f49,f530,f135,f136,f137,f138,f139,f141,f142,f144,f145,f147,f148,f140,f143,f146,f149,f55,f62,f162,f92,f173,f104,f105,f84,f85,f183,f184,f185,f186,f187,f188,f189,f190,f191,f192,f107,f111,f86,f177,f78,f110,f262,f263,f264,f267,f268,f255,f256,f257,f258,f127,f199,f128,f198,f259,f260,f261,f171,f277,f278,f279,f288,f152,f250,f251,f252,f253,f254,f269,f270,f271,f272,f273,f274,f275,f276,f265,f266,f289,f290,f294,f295&secid=1.600764", 600764);
+                HttpGet($"http://51.push2.eastmoney.com/api/qt/stock/sse?ut=fa5fd1943c7b386f172d6893dbfba10b&fltt=2&fields=f120,f121,f122,f174,f175,f59,f163,f43,f57,f58,f169,f170,f46,f44,f51,f168,f47,f164,f116,f60,f45,f52,f50,f48,f167,f117,f71,f161,f49,f530,f135,f136,f137,f138,f139,f141,f142,f144,f145,f147,f148,f140,f143,f146,f149,f55,f62,f162,f92,f173,f104,f105,f84,f85,f183,f184,f185,f186,f187,f188,f189,f190,f191,f192,f107,f111,f86,f177,f78,f110,f262,f263,f264,f267,f268,f255,f256,f257,f258,f127,f199,f128,f198,f259,f260,f261,f171,f277,f278,f279,f288,f152,f250,f251,f252,f253,f254,f269,f270,f271,f272,f273,f274,f275,f276,f265,f266,f289,f290,f294,f295&secid=1.{code}", Convert.ToInt32(code));
             }
             catch (Exception ex)
             {
                 throw;
             }
+        }
+
+        /// <summary>
+        /// 获取
+        /// </summary>
+        /// <param name="code"></param>
+        /// <param name="name"></param>
+        /// <param name="pageIndex"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        public PagingData<Tickets> GetTickets(string code, string name, int pageIndex, int pageSize)
+        {
+            IQueryable<Tickets> tickets;
+            if (code == null && name == null)
+            {
+                tickets = _dbContext.Tickets;
+            }
+            else
+            {
+                tickets = _dbContext.Tickets.Where(t => t.Code == code || t.Name.Contains(name));
+            }
+            PagingData<Tickets> pagingData = new PagingData<Tickets>();
+            pagingData.Countnum = tickets.Count();
+            var list = tickets.Skip(pageIndex * pageSize).Take(pageSize).ToList();
+
+            pagingData.Data = new List<Tickets>();
+            foreach (var item in list)
+            {
+                pagingData.Data.Add(item);
+            }
+            return pagingData;
+        }
+
+        /// <summary>
+        /// 添加
+        /// </summary>
+        /// <param name="ticket"></param>
+        public bool AddTicket(Tickets ticket)
+        {
+            try
+            {
+                ticket.Status = false;
+                ticket.CreateTime = DateTime.Now;
+                _dbContext.Tickets.Add(ticket);
+                if (_dbContext.SaveChanges() > 0)
+                {
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// 删除
+        /// </summary>
+        /// <param name="ticket"></param>
+        public bool DelTicket(List<Tickets> ticket)
+        {
+            _dbContext.Tickets.RemoveRange(ticket);
+            if (_dbContext.SaveChanges() > 0)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 启动
+        /// </summary>
+        /// <param name="ticket"></param>
+        /// <returns></returns>
+        public bool StartTicket(Tickets ticket)
+        {
+            var t = _dbContext.Tickets.FirstOrDefault(t => t.Code == ticket.Code);
+            t.Status = true;
+            if (_dbContext.SaveChanges() > 0)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 停止
+        /// </summary>
+        /// <param name="ticket"></param>
+        /// <returns></returns>
+        public bool StopTicket(Tickets ticket)
+        {
+            var t = _dbContext.Tickets.FirstOrDefault(t => t.Code == ticket.Code);
+            t.Status = false;
+            if (_dbContext.SaveChanges() > 0)
+            {
+                return true;
+            }
+            return false;
         }
     }
 
