@@ -78,6 +78,8 @@
                 }
                 axios.get('GetTicketView?code=' + this.code + '&beginDate=' + d[0] + '&endDate=' + d[1])
                     .then(res => {
+                        this.ticketsWeiBi = [];
+                        this.ticketsUpDown = [];
                         for (var i = 0; i < res.data.length; i++) {
                             this.ticketsWeiBi.push(res.data[i].weiBi);
                             this.ticketsUpDown.push(res.data[i].upDown);
