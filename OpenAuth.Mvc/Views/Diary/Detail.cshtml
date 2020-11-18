@@ -1,0 +1,185 @@
+﻿
+@{
+    ViewData["Title"] = "Detail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section header
+{
+    <script src="~/js/v-echarts/echarts.min.js"></script>
+    <link href="~/css/WebHome/bootstrap.css" rel="stylesheet" />
+}
+<style>
+
+    .abow_dialog {
+        display: flex;
+        justify-content: center;
+        align-items: Center;
+        overflow: auto;
+    }
+</style>
+<div id="robotm">
+    <el-container>
+        <el-main class="main">
+            <div class="backdiv">
+                <el-row :gutter="5">
+                    <el-col :span="4">
+                        <el-select v-model="code">
+                            <el-option v-for="item in tickets"
+                                       :key="item.code"
+                                       :label="item.name"
+                                       :value="item.code">
+                            </el-option>
+                    </el-col>
+                    <el-col :span="4">
+                        <el-date-picker v-model="selectDataRange" style="width:auto;"
+                                        type="daterange"
+                                        placeholder="选择查询日期"
+                                        value-format="yyyy-MM-dd">
+                        </el-date-picker>
+                    </el-col>
+                    <el-col :span="3">
+                        <el-button type="primary" plain class="el-icon-search" v-on:click="SeleceDate">查询</el-button>
+                    </el-col>
+                </el-row>
+            </div>
+        </el-main>
+    </el-container>
+</div>
+<div id="main" style="height:400px;" class="col-sm-12 col-md-6"></div>
+<div id="upDown" style="height:400px;" class="col-sm-12 col-md-6"></div>
+<script>
+    var myChart = echarts.init(document.getElementById('main'));
+    var myChart2 = echarts.init(document.getElementById('upDown'));
+
+    var app = new Vue({
+        el: '#robotm',
+        data: {
+            tableData: [],//表格数据
+            selrow: [],//table中选中的数据
+            inputCode: '',//股票代码输入框
+            inputName: '',//名称
+            srcview: '',
+            dialogDetail: false,
+            code: '',
+            tickets: [],
+            ticketsWeiBi: [],
+            ticketsUpDown: [],
+            selectDataRange: []
+        },
+        mounted: function () {
+            this.popDropDown();
+        },
+        methods: {
+            getView: function () {
+                var d = ["", ""]
+                if (this.selectDataRange != null && this.selectDataRange[0] != null) {
+                    d[0] = this.selectDataRange[0];
+                    d[1] = this.selectDataRange[1];
+                }
+                axios.get('GetTicketView?code=' + this.code + '&beginDate=' + d[0] + '&endDate=' + d[1])
+                    .then(res => {
+                        for (var i = 0; i < res.data.length; i++) {
+                            this.ticketsWeiBi.push(res.data[i].weiBi);
+                            this.ticketsUpDown.push(res.data[i].upDown);
+                        }
+                        // 填入数据
+                        myChart.setOption({
+                            title: {
+                                text: '委比走势图'
+                            },
+                            xAxis: {
+                                type: 'category',
+                                data: []
+                            },
+                            yAxis: {
+                                type: 'value'
+                            },
+                            legend: {
+                                data: ['销量']
+                            },
+                            series: [
+                                {
+                                    name: '委比',
+                                    data: this.ticketsWeiBi,
+                                    type: 'line'
+                                }
+                            ]
+                        });
+                        myChart2.setOption({
+                            title: {
+                                text: '涨幅走势图'
+                            },
+                            xAxis: {
+                                type: 'category',
+                                data: []
+                            },
+                            yAxis: {
+                                type: 'value'
+                            },
+                            legend: {
+                                data: ['销量']
+                            },
+                            series: [
+                                {
+                                    name: '涨幅',
+                                    data: this.ticketsUpDown,
+                                    type: 'line'
+                                }
+                            ]
+                        });
+                    }).catch(err_total => { })
+            },
+            //条件查询按钮
+            SeleceDate: function () {
+                this.getView();
+            },
+            popDropDown: function () {
+                //debugger;
+                axios.get('GetTicketsList').then(resp => {
+                    for (var i = 0; i < resp.data.length; i++) {
+                        var condit = { code: resp.data[i].code, name: resp.data[i].name };
+                        this.tickets.push(condit);
+                    }
+                })
+            },
+            //条件查询按钮
+            SeleceDate: function () {
+                this.curr_page = 1;
+                this.getView();
+            },
+            //时间格式化
+            formatTime: function (date) {
+                var date = new Date(date);
+                let o = {
+                    'y+': date.getFullYear(),
+                    'M+': date.getMonth() + 1,
+                    'd+': date.getDate(),
+                    'h+': date.getHours(),
+                    'm+': date.getMinutes(),
+                    's+': date.getSeconds()
+                };
+                for (var i = 1; i < o.length; i++) {
+                    if (o[i].length == 1) {
+                        o[i] = '0' + o[i];
+                    }
+                }
+                if (o["M+"].toString().length == 1) {
+                    o["M+"] = '0' + o["M+"].toString();
+                }
+                if (o["d+"].toString().length == 1) {
+                    o["d+"] = '0' + o["d+"].toString();
+                }
+                if (o["h+"].toString().length == 1) {
+                    o["h+"] = '0' + o["h+"].toString();
+                }
+                if (o["m+"].toString().length == 1) {
+                    o["m+"] = '0' + o["m+"].toString();
+                }
+                if (o["s+"].toString().length == 1) {
+                    o["s+"] = '0' + o["s+"].toString();
+                }
+                return (o["y+"] + '-' + o["M+"] + '-' + o["d+"] + "\n" + o["h+"] + ':' + o["m+"] + ':' + o["s+"]);
+            }
+        }
+    })
+</script>

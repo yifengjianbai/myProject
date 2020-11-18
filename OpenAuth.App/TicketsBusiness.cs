@@ -10,6 +10,7 @@ using log4net;
 using log4net.Repository;
 using System.Threading;
 using Microsoft.Extensions.Configuration;
+using System.Linq;
 
 namespace OpenAuth.App
 {
@@ -127,6 +128,10 @@ namespace OpenAuth.App
                     a = "";
                 }
             }
+            runningTickets.Remove(code);
+            Tickets ticket = _dbContext.Tickets.FirstOrDefault(t => t.Code == code);
+            ticket.Status = false;
+            _dbContext.SaveChanges();
 
             myStreamReader.Close();
             myResponseStream.Close();

@@ -89,7 +89,33 @@ namespace OpenAuth.Mvc.Controllers
             };
         }
 
-        [AllowAnonymous]
+        public List<Tickets> GetTicketsList()
+        {
+            return ReptilesApp.GetTicketsList();
+        }
+
+        public List<Ticksanalysis> GetTicketView(string code, string beginDate, string endDate)
+        {
+            string beginStr = DateTime.Now.ToString("yyyy-MM-dd");
+            string endStr = DateTime.Now.ToString("yyyy-MM-dd");
+            if (beginDate != null && beginDate != "")
+            {
+                beginStr = beginDate;
+            }
+            if (endDate != null && endDate != "")
+            {
+                endStr = endDate;
+            }
+            DateTime begin = Convert.ToDateTime(beginStr);
+            DateTime end = Convert.ToDateTime($"{endStr} 23:59:59");
+            return ReptilesApp.TicketDetail(code, begin, end);
+        }
+
+        public IActionResult Detail()
+        {
+            return View();
+        }
+
         public IActionResult Index()
         {
             //int port = Request.HttpContext.Connection.LocalPort;

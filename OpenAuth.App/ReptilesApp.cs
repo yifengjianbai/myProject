@@ -140,6 +140,38 @@ namespace OpenAuth.App
         }
 
         /// <summary>
+        /// 获取代码列表
+        /// </summary>
+        /// <returns></returns>
+        public List<Tickets> GetTicketsList()
+        {
+            return _dbContext.Tickets.ToList();
+        }
+
+        /// <summary>
+        /// 获取详情
+        /// </summary>
+        /// <param name="code"></param>
+        /// <param name="begin"></param>
+        /// <param name="end"></param>
+        /// <returns></returns>
+        public List<Ticksanalysis> TicketDetail(string code, DateTime begin, DateTime end)
+        {
+            try
+            {
+                var res = _dbContext.Ticksanalysis.Where(
+                        t => t.Code == Convert.ToInt32(code) &&
+                        t.Time >= begin &&
+                        t.Time <= end).ToList();
+                return res;
+            }
+            catch (Exception ex)
+            {
+                return new List<Ticksanalysis>();
+            }
+        }
+
+        /// <summary>
         /// 添加
         /// </summary>
         /// <param name="ticket"></param>
