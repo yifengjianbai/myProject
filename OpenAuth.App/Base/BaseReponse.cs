@@ -8,5 +8,6 @@ namespace OpenAuth.App.Base
     {
         public int Code { get; set; }
         public string Message { get; set; }
+        public string Other { get; set; }
     }
 }

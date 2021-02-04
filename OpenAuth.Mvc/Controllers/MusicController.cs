@@ -129,6 +129,7 @@ namespace OpenAuth.Mvc.Controllers
 
                     respo.Message = AppConfiguration.Value.UrlAddress + @"\fileupload\" + str + projectFileName;//图片地址
                     respo.Code = 200;
+                    respo.Other = filePath;
                 }
                 else
                 {
