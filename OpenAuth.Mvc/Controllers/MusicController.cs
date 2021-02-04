@@ -107,7 +107,7 @@ namespace OpenAuth.Mvc.Controllers
             respo.Message = "";
             try
             {
-                var path = environment.WebRootPath + @"\fileupload\";//获取应用程序的当前工作目录
+                var path = environment.WebRootPath + @"/fileupload/";//获取应用程序的当前工作目录
                 if (file != null)
                 {
                     var fileDir = path;
@@ -127,7 +127,7 @@ namespace OpenAuth.Mvc.Controllers
                         fs.Flush();
                     }
 
-                    respo.Message = AppConfiguration.Value.UrlAddress + @"\fileupload\" + str + projectFileName;//图片地址
+                    respo.Message = AppConfiguration.Value.UrlAddress + @"/fileupload/" + str + projectFileName;//图片地址
                     respo.Code = 200;
                     respo.Other = filePath;
                 }
