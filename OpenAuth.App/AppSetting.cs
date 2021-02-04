@@ -42,5 +42,6 @@ namespace OpenAuth.App
 
         //是否是Identity授权方式
         public bool IsIdentityAuth => !string.IsNullOrEmpty(IdentityServerUrl);
+        public string UrlAddress { get; set; }
     }
 }

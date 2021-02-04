@@ -1,0 +1,373 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+
+    .abow_dialog {
+        display: flex;
+        justify-content: center;
+        align-items: Center;
+        overflow: auto;
+    }
+</style>
+<div id="robotm">
+    <el-container class="container">
+        <el-main class="main">
+            <div class="backdiv">
+                <el-row :gutter="5">
+                    <el-col style="width:auto">
+                        <el-button v-on:click="addItem" icon="el-icon-plus" style="background-color:lightskyblue;color:whitesmoke;">添加</el-button>
+                        <el-button v-on:click="delItem" icon="el-icon-delete" style="background-color:orangered;color:whitesmoke;">删除</el-button>
+                    </el-col>
+                    <el-col :span="3">
+                        <el-input v-model="inputCode" placeholder="搜索条件"></el-input>
+                    </el-col>
+                    <el-col :span="3">
+                        <el-button type="primary" plain class="el-icon-search" v-on:click="SeleceDate">查询</el-button>
+                    </el-col>
+                </el-row>
+            </div>
+            <div class="backdiv">
+                <el-table :data="tableData" :border="false" fit v-on:selection-change="rowselchange" v-loading="loadingTable" element-loading-text="正在加载数据..."
+                          :header-cell-style="{background:'white',color:'#555'}">
+                    <el-table-column type="selection"
+                                     width="55">
+                    </el-table-column>
+                    <el-table-column prop="pic"
+                                     label="图片">
+                        <template slot-scope="scope">
+                            <el-image style="width: 50px; height: 50px;"
+                                      :src="scope.row.pic"></el-image>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="album" :show-overflow-tooltip="true"
+                                     label="专辑">
+                    </el-table-column>
+                    <el-table-column prop="title" :show-overflow-tooltip="true"
+                                     label="歌名">
+                    </el-table-column>
+                    <el-table-column prop="singer" :show-overflow-tooltip="true"
+                                     label="歌手">
+                    </el-table-column>
+                    <el-table-column prop="tag" :show-overflow-tooltip="true"
+                                     label="标签">
+                    </el-table-column>
+                    <el-table-column prop="pubTime" :show-overflow-tooltip="true"
+                                     label="发布时间">
+                    </el-table-column>
+                    @*<el-table-column label="状态">
+            <template slot-scope="scope">
+                <span v-if="scope.row.status==1">
+                    <i style="color:green" class="el-icon-success"></i>
+                </span>
+                <span v-if="scope.row.status==0">
+                    <i class="el-icon-remove"></i>
+                </span>
+            </template>
+        </el-table-column>*@
+                    <el-table-column label="操作">
+                        <template scope="scope">
+                            <el-button @@click="removeItem(scope.row)" type="text" size="small" plain circle icon="el-icon-delete"> 删除</el-button>
+                            <el-button @@click="updateItem(scope.row)" type="text" size="small" plain circle icon="el-icon-delete"> 修改</el-button>
+                            <a :href="'/Music/PlayMusic?Id=' + scope.row.id" target="_blank">播放</a>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </div>
+            <div class="block">
+                <el-pagination v-on:size-change="handleSizeChange"
+                               v-on:current-change="handleCurrentChange"
+                               :current-page="curr_page"
+                               :page-sizes="pageSizes"
+                               :page-size="curr_pageSize"
+                               layout="total, sizes, prev, pager, next, jumper"
+                               :total="totalnum"
+                               v-if="totalnum!=0">
+                </el-pagination>
+            </div>
+        </el-main>
+    </el-container>
+
+    <el-dialog :visible.sync="dialogFormVisible" :close-on-click-modal="false">
+        <el-form>
+            <el-form-item>
+                <el-row>
+                    <el-col>
+                        <div>专辑:</div>
+                    </el-col>
+                    <el-col>
+                        <div><el-input v-model="music.album" placeholder="专辑"></el-input></div>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col>
+                        <div>歌名:</div>
+                    </el-col>
+                    <el-col>
+                        <div><el-input v-model="music.title" placeholder="歌名"></el-input></div>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col>
+                        <div>歌手:</div>
+                    </el-col>
+                    <el-col>
+                        <div><el-input v-model="music.singer" placeholder="歌手"></el-input></div>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col>
+                        <div>标签:</div>
+                    </el-col>
+                    <el-col>
+                        <div><el-input v-model="music.tag" placeholder="标签"></el-input></div>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col>
+                        <div>发布时间:</div>
+                    </el-col>
+                    <el-col>
+                        <el-date-picker v-model="music.pubTime" style="width: auto"
+                                        type="date"
+                                        placeholder="选择日期时间"
+                                        value-format="yyyy-MM-dd">
+                        </el-date-picker>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col><div>图片:</div></el-col>
+                    <el-col>
+                        <el-upload class="avatar-uploader"
+                                   action="Upload"
+                                   :show-file-list="false"
+                                   :on-success="titleimgSuccess">
+                            <img v-if="titleimageUrl" :src="titleimageUrl" class="avatar">
+                            <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                        </el-upload>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col>
+                        <div>文件路径:</div>
+                    </el-col>
+                    <el-col>
+                        <el-upload class="avatar-uploader"
+                                   action="Upload"
+                                   :show-file-list="false"
+                                   :on-success="musicSuccess">
+                            <el-input v-if="musicUrl" v-model="music.url" :readonly="true"></el-input>
+                            <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                        </el-upload>
+                    </el-col>
+                </el-row>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button v-on:click="dialogFormVisible = false">取 消</el-button>
+            <el-button type="primary" v-on:click="confirm">确 定</el-button>
+        </div>
+    </el-dialog>
+</div>
+<script>
+    var app = new Vue({
+        el: '#robotm',
+        data: {
+            tableData: [],//表格数据
+            loadingTable: false,//tablelist的loading
+            selrow: [],//table中选中的数据
+            inputCode: '',//查询条件
+            dialogFormVisible: false,//dialog2可见
+            titleimageUrl: '',
+            musicUrl:'',
+            pppss: {imagetype:'Commodity',restype:0,plainText:'',encryptValue:''},//上传时附带的图片类型数据
+            curr_page: 1,//分页，当前页：1
+            pageSizes: [10, 20, 50, 100, 300],//分页，页大小数组
+            curr_pageSize: 10,//分页当前页大小
+            totalnum: 0,//分页，共n条
+            music: { album: '', pic: '', singer: '', tag: '', title: '', url: '', pubTime: '' }
+        },
+        mounted: function mounted() {
+            var url = window.location.search;
+            if (url != "") {
+                var paramsStr = (url.split("="))[1];
+                var params = paramsStr.split(';');
+                this.inputCode = params[0];
+                this.curr_page = parseInt(params[1]);
+                this.curr_pageSize = parseInt(params[2]);
+            }
+            this.getView();
+        },
+        methods: {
+            //获取列表
+            getView: function () {
+                this.loadingTable = true;
+                var condition = this.inputCode; if (this.inputCode.length == 0) { code = ''; }
+                axios.get('GetMusicList?condition=' + condition + '&pageIndex=' + this.curr_page + '&pageSize=' + this.curr_pageSize)
+                    .then(res_total => {
+                        this.totalnum = res_total.data.countnum;
+                        this.tableData = res_total.data.data;
+                        this.loadingTable = false;
+                        console.log(this.tableData);
+                    }).catch(err_total => { })
+
+            },
+            //条件查询按钮
+            SeleceDate: function () {
+                this.curr_page = 1;
+                this.getView();
+            },
+            //选中行改变
+            rowselchange: function (sel) {
+                this.selrow = sel;
+            },
+            removeItem: function (row) {
+                var rows = [];
+                rows.push(row);
+                axios.post('RemoveMusic', rows).then(res => {
+                    this.$message({ type: 'success', message: '删除成功!' });
+                    this.getView();
+                });
+            },
+            //删除
+            delItem: function () {
+                if (this.selrow.length == 0) { this.$message({ message: '未选中行', type: 'warning' }); return; }
+
+                this.$confirm('已选中' + this.selrow.length + '行,确定删除?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    axios.post('RemoveMusic', this.selrow).then(res => {
+                        this.$message({ type: 'success', message: '删除成功!' });
+                        this.getView();
+                    });
+                }).catch(() => {
+                    this.$message({ type: 'info', message: '已取消删除' });
+                });
+
+            },
+            //添加
+            addItem: function () {
+                this.titleimageUrl = "";
+                this.musicUrl = "";
+                this.music = { album: '', pic: '', singer: '', tag: '', title: '', url: '', pubTime: '' };
+                this.dialogFormVisible = true;
+            },
+            updateItem: function (row) {
+                music = row;
+                this.dialogFormVisible = true;
+            },
+            //确定添加
+            confirm: function () {
+                debugger;
+                if (this.music.album == '') {
+                    this.$message({ type: 'info', message: '专辑不能为空' });
+                }
+                if (this.music.title == '') {
+                    this.$message({ type: 'info', message: '歌名不能为空' });
+                }
+                if (this.music.singer == '') {
+                    this.$message({ type: 'info', message: '歌手不能为空' });
+                }
+                if (this.music.tag == '') {
+                    this.$message({ type: 'info', message: '标签不能为空' });
+                }
+                if (this.music.pubTime == '') {
+                    this.$message({ type: 'info', message: '发布时间不能为空' });
+                }
+                if (this.music.pic == '') {
+                    this.$message({ type: 'info', message: '请上传图片' });
+                }
+                if (this.music.url == '') {
+                    this.$message({ type: 'info', message: '请上传音乐文件' });
+                }
+                axios.post('AddUptMusic', this.music).then(res => {
+                    if (res.data.code == 200) {
+                        this.dialogFormVisible = false;
+                        this.$message({
+                            message: '保存成功',
+                            type: 'success'
+                        });
+                        this.getView();
+                    }
+                })
+            },
+            titleimgSuccess: function (res, file) {
+                if (res.code == 200) {
+                    this.titleimageUrl = URL.createObjectURL(file.raw);
+                    this.music.pic = res.message;
+                    @*if (path.indexOf("http") == -1) {
+                        var uploadUrl = '@ViewBag.apiUrl';
+                        var index = uploadUrl.indexOf("api");
+                        path = uploadUrl.substring(0, (index-1)) + res.message;//var path = localhostPath + res.message;
+                    }
+                    this.commodity.goodsPicture = path;*@
+                }
+                else { alert(res.message); }
+            },
+            musicSuccess: function (res, file) {
+                if (res.code == 200) {
+                    this.musicUrl = URL.createObjectURL(file.raw);
+                    this.music.url = res.message;
+                }
+                else { alert(res.message); }
+            },
+            beforeAvatarUpload_big: async function (file) {//async
+                let headersconfig = {//'Content-Type': 'application/json;charset=UTF-8'   application/x-www-form-urlencoded
+                    headers: { 'Content-Type': 'application/json;charset=UTF-8' }//'Content-Type': 'multipart/form-data'
+                }
+                this.pppss.imagetype = 'Commodity';
+                var coik = document.cookie;
+                this.pppss.plainText = coik;
+                await axios.get('GetEncrypstr?str=' + coik).then(async res => {
+                    this.pppss.plainText = coik;
+                    this.pppss.encryptValue = res.data;
+                })
+            },
+            //分页 页显示条数改变时
+            handleSizeChange: function (val) {
+                this.curr_pageSize = val;
+                this.getView();
+            },
+            //分页 当前定位页数改变时
+            handleCurrentChange: function (val) {
+                this.curr_page = val;
+                this.getView();
+            },
+            //时间格式化
+            formatTime: function (date) {
+                var date = new Date(date);
+                let o = {
+                    'y+': date.getFullYear(),
+                    'M+': date.getMonth() + 1,
+                    'd+': date.getDate(),
+                    'h+': date.getHours(),
+                    'm+': date.getMinutes(),
+                    's+': date.getSeconds()
+                };
+                for (var i = 1; i < o.length; i++) {
+                    if (o[i].length == 1) {
+                        o[i] = '0' + o[i];
+                    }
+                }
+                if (o["M+"].toString().length == 1) {
+                    o["M+"] = '0' + o["M+"].toString();
+                }
+                if (o["d+"].toString().length == 1) {
+                    o["d+"] = '0' + o["d+"].toString();
+                }
+                if (o["h+"].toString().length == 1) {
+                    o["h+"] = '0' + o["h+"].toString();
+                }
+                if (o["m+"].toString().length == 1) {
+                    o["m+"] = '0' + o["m+"].toString();
+                }
+                if (o["s+"].toString().length == 1) {
+                    o["s+"] = '0' + o["s+"].toString();
+                }
+                return (o["y+"] + '-' + o["M+"] + '-' + o["d+"] + "\n" + o["h+"] + ':' + o["m+"] + ':' + o["s+"]);
+            }
+        }
+    })
+</script>

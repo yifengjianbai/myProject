@@ -29,6 +29,7 @@ namespace OpenAuth.Repository.dbContext
         public virtual DbSet<Frmleavereq> Frmleavereq { get; set; }
         public virtual DbSet<Module> Module { get; set; }
         public virtual DbSet<Moduleelement> Moduleelement { get; set; }
+        public virtual DbSet<Music> Music { get; set; }
         public virtual DbSet<Org> Org { get; set; }
         public virtual DbSet<Relevance> Relevance { get; set; }
         public virtual DbSet<Resource> Resource { get; set; }
@@ -999,6 +1000,56 @@ namespace OpenAuth.Repository.dbContext
                     .HasCollation("utf8_general_ci");
             });
 
+            modelBuilder.Entity<Music>(entity =>
+            {
+                entity.ToTable("music");
+
+                entity.Property(e => e.Album)
+                    .IsRequired()
+                    .HasColumnType("varchar(50)")
+                    .HasComment("专辑")
+                    .HasCharSet("utf8")
+                    .HasCollation("utf8_general_ci");
+
+                entity.Property(e => e.Pic)
+                    .IsRequired()
+                    .HasColumnType("varchar(255)")
+                    .HasComment("图片")
+                    .HasCharSet("utf8")
+                    .HasCollation("utf8_general_ci");
+
+                entity.Property(e => e.PubTime)
+                    .HasColumnType("date")
+                    .HasComment("发布时间");
+
+                entity.Property(e => e.Singer)
+                    .IsRequired()
+                    .HasColumnType("varchar(50)")
+                    .HasComment("歌手")
+                    .HasCharSet("utf8")
+                    .HasCollation("utf8_general_ci");
+
+                entity.Property(e => e.Tag)
+                    .IsRequired()
+                    .HasColumnType("varchar(100)")
+                    .HasComment("标签")
+                    .HasCharSet("utf8")
+                    .HasCollation("utf8_general_ci");
+
+                entity.Property(e => e.Title)
+                    .IsRequired()
+                    .HasColumnType("varchar(50)")
+                    .HasComment("标题")
+                    .HasCharSet("utf8")
+                    .HasCollation("utf8_general_ci");
+
+                entity.Property(e => e.Url)
+                    .IsRequired()
+                    .HasColumnType("varchar(255)")
+                    .HasCharSet("utf8")
+                    .HasCollation("utf8_general_ci");
+            });
+
             modelBuilder.Entity<Org>(entity =>
             {
                 entity.ToTable("org");
@@ -1545,6 +1596,16 @@ namespace OpenAuth.Repository.dbContext
             modelBuilder.Entity<Tickets>(entity =>
             {
                 entity.ToTable("tickets");
+
+                entity.HasIndex(e => e.Code)
+                    .HasName("uniq")
+                    .IsUnique();
+
+                entity.Property(e => e.Code)
+                    .IsRequired()
+                    .HasColumnType("varchar(20)")
+                    .HasCharSet("utf8")
+                    .HasCollation("utf8_general_ci");
 
                 entity.Property(e => e.CreateTime).HasColumnType("datetime");
 

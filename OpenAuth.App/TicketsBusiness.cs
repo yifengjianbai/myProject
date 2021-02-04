@@ -14,6 +14,9 @@ using System.Linq;
 
 namespace OpenAuth.App
 {
+    /// <summary>
+    /// Ticks业务层
+    /// </summary>
     public class TicketsBusiness
     {
         //private static ILoggerRepository repository = LogManager.CreateRepository("NETCoreRepository");

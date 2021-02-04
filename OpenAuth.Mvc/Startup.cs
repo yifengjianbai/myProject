@@ -110,6 +110,7 @@ namespace OpenAuth.Mvc
             }
 
             services.AddSingleton<TicketsBusiness>();
+            services.AddSingleton<MusicApp>();
 
             services.AddHttpClient();
             
