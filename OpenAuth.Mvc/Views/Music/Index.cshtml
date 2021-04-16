@@ -17,7 +17,8 @@
                 <el-row :gutter="5">
                     <el-col style="width:auto">
                         <el-button v-on:click="addItem" icon="el-icon-plus" style="background-color:lightskyblue;color:whitesmoke;">添加</el-button>
-                        <el-button v-on:click="delItem" icon="el-icon-delete" style="background-color:orangered;color:whitesmoke;">删除</el-button>
+                        <el-button v-on:click="downItems" style="background-color:orangered;color:whitesmoke;">批量下架</el-button>
+                        <el-button v-on:click="upItems" style="background-color:green;color:whitesmoke;">批量上架</el-button>
                     </el-col>
                     <el-col :span="3">
                         <el-input v-model="inputCode" placeholder="搜索条件"></el-input>
@@ -67,9 +68,16 @@
         </el-table-column>*@
                     <el-table-column label="操作">
                         <template scope="scope">
-                            <el-button @@click="removeItem(scope.row)" type="text" size="small" plain circle icon="el-icon-delete"> 删除</el-button>
-                            <el-button @@click="updateItem(scope.row)" type="text" size="small" plain circle icon="el-icon-delete"> 修改</el-button>
+                            <el-button @@click="removeItem(scope.row)" v-if="scope.row.status==1" type="text" size="small" plain circle> 下架</el-button>
+                            <el-button @@click="upMusic(scope.row)" v-if="scope.row.status==-1" type="text" size="small" plain circle> 上架</el-button>
+                            <el-button @@click="updateItem(scope.row)" type="text" size="small" plain circle icon="el-icon-edit"> 修改</el-button>
                             <a :href="'/Music/PlayMusic?Id=' + scope.row.id" target="_blank">播放</a>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="状态">
+                        <template scope="scope">
+                            <i v-if="scope.row.status==1" style="color:green" class="el-icon-circle-check"></i>
+                            <i v-if="scope.row.status==-1" style="color:gray" class="el-icon-circle-close"></i>
                         </template>
                     </el-table-column>
                 </el-table>
@@ -203,12 +211,11 @@
             getView: function () {
                 this.loadingTable = true;
                 var condition = this.inputCode; if (this.inputCode.length == 0) { code = ''; }
-                axios.get('GetMusicList?condition=' + condition + '&pageIndex=' + this.curr_page + '&pageSize=' + this.curr_pageSize)
+                axios.get('GetMusicListAuthor?condition=' + condition + '&pageIndex=' + this.curr_page + '&pageSize=' + this.curr_pageSize)
                     .then(res_total => {
                         this.totalnum = res_total.data.countnum;
                         this.tableData = res_total.data.data;
                         this.loadingTable = false;
-                        console.log(this.tableData);
                     }).catch(err_total => { })
 
             },
@@ -221,29 +228,57 @@
             rowselchange: function (sel) {
                 this.selrow = sel;
             },
+            //下架
             removeItem: function (row) {
                 var rows = [];
                 rows.push(row);
-                axios.post('RemoveMusic', rows).then(res => {
-                    this.$message({ type: 'success', message: '删除成功!' });
+                axios.post('DownMusic', rows).then(res => {
+                    this.$message({ type: 'success', message: '操作成功!' });
                     this.getView();
                 });
             },
-            //删除
-            delItem: function () {
+            //上架
+            upMusic: function (row) {
+                var rows = [];
+                rows.push(row);
+                axios.post('UpMusic', rows).then(res => {
+                    this.$message({ type: 'success', message: '操作成功!' });
+                    this.getView();
+                });
+            },
+            //批量下架
+            downItems: function () {
                 if (this.selrow.length == 0) { this.$message({ message: '未选中行', type: 'warning' }); return; }
 
-                this.$confirm('已选中' + this.selrow.length + '行,确定删除?', '提示', {
+                this.$confirm('已选中' + this.selrow.length + '行,确定下架?', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
-                    axios.post('RemoveMusic', this.selrow).then(res => {
-                        this.$message({ type: 'success', message: '删除成功!' });
+                    axios.post('DownMusic', this.selrow).then(res => {
+                        this.$message({ type: 'success', message: '下架成功!' });
                         this.getView();
                     });
                 }).catch(() => {
-                    this.$message({ type: 'info', message: '已取消删除' });
+                    this.$message({ type: 'info', message: '已取消' });
+                });
+
+            },
+            //批量上架
+            upItems: function () {
+                if (this.selrow.length == 0) { this.$message({ message: '未选中行', type: 'warning' }); return; }
+
+                this.$confirm('已选中' + this.selrow.length + '行,确定上架?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    axios.post('UpMusic', this.selrow).then(res => {
+                        this.$message({ type: 'success', message: '上架成功!' });
+                        this.getView();
+                    });
+                }).catch(() => {
+                    this.$message({ type: 'info', message: '已取消' });
                 });
 
             },
@@ -255,7 +290,8 @@
                 this.dialogFormVisible = true;
             },
             updateItem: function (row) {
-                music = row;
+                this.music = row;
+                this.titleimageUrl = row.pic;
                 this.dialogFormVisible = true;
             },
             //确定添加

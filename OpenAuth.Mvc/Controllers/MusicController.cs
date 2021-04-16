@@ -63,16 +63,31 @@ namespace OpenAuth.Mvc.Controllers
         }
 
         /// <summary>
-        /// 删除音乐
+        /// 下架音乐
         /// </summary>
         /// <param name="musics"></param>
         /// <returns></returns>
         [HttpPost]
-        public BaseReponse RemoveMusic([FromBody]List<Music> musics)
+        public BaseReponse DownMusic([FromBody]List<Music> musics)
         {
             BaseReponse baseReponse = new BaseReponse
             {
-                Code = MusicApp.RemoveMusic(musics)
+                Code = MusicApp.DownMusic(musics)
+            };
+            return baseReponse;
+        }
+
+        /// <summary>
+        /// 上架音乐
+        /// </summary>
+        /// <param name="musics"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public BaseReponse UpMusic([FromBody]List<Music> musics)
+        {
+            BaseReponse baseReponse = new BaseReponse
+            {
+                Code = MusicApp.UpMusic(musics)
             };
             return baseReponse;
         }
@@ -84,6 +99,19 @@ namespace OpenAuth.Mvc.Controllers
         /// <param name="pageIndex"></param>
         /// <param name="pageSize"></param>
         /// <returns></returns>
+        [HttpGet]
+        public PagingData<Music> GetMusicListAuthor(string condition, int pageIndex, int pageSize)
+        {
+            return MusicApp.GetMusicListAuthor(condition, pageIndex, pageSize);
+        }
+
+        [AllowAnonymous]
+        public IActionResult MusicWeb()
+        {
+            return View();
+        }
+
+        [AllowAnonymous]
         [HttpGet]
         public PagingData<Music> GetMusicList(string condition, int pageIndex, int pageSize)
         {

@@ -1,0 +1,159 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+
+    .abow_dialog {
+        display: flex;
+        justify-content: center;
+        align-items: Center;
+        overflow: auto;
+    }
+</style>
+<div id="robotm">
+    <el-container class="container">
+        <el-main class="main">
+            <div class="backdiv">
+                <el-row :gutter="5">
+                    <el-col :span="3">
+                        <el-input v-model="inputCode" placeholder="搜索条件"></el-input>
+                    </el-col>
+                    <el-col :span="3">
+                        <el-button type="primary" plain class="el-icon-search" v-on:click="SeleceDate">查询</el-button>
+                    </el-col>
+                </el-row>
+            </div>
+            <div class="backdiv">
+                <el-table :data="tableData" :border="false" style="width:80%">
+                    @*<el-table-column prop="pic"
+                                     label="图片">
+                        <template slot-scope="scope">
+                            <el-image style="width: 50px; height: 50px;"
+                                      :src="scope.row.pic"></el-image>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="album" :show-overflow-tooltip="true"
+                                     label="专辑">
+                    </el-table-column>*@
+                    <el-table-column prop="title" :show-overflow-tooltip="true"
+                                     label="歌名">
+                    </el-table-column>
+                    <el-table-column prop="singer" :show-overflow-tooltip="true"
+                                     label="歌手">
+                    </el-table-column>
+                    @*<el-table-column prop="tag" :show-overflow-tooltip="true"
+                                     label="标签">
+                    </el-table-column>
+                    <el-table-column prop="pubTime" :show-overflow-tooltip="true"
+                                     label="发布时间">
+                    </el-table-column>*@
+                    <el-table-column label="">
+                        <template scope="scope">
+                            <a :href="'/Music/PlayMusic?Id=' + scope.row.id" target="_blank" class="icon el-icon-service" style="color:blue">播放</a>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </div>
+            <div class="block">
+                <el-pagination v-on:size-change="handleSizeChange"
+                               v-on:current-change="handleCurrentChange"
+                               :current-page="curr_page"
+                               :page-sizes="pageSizes"
+                               :page-size="curr_pageSize"
+                               layout="total, sizes, prev, pager, next, jumper"
+                               :total="totalnum"
+                               v-if="totalnum!=0">
+                </el-pagination>
+            </div>
+        </el-main>
+    </el-container>
+</div>
+<script>
+    var app = new Vue({
+        el: '#robotm',
+        data: {
+            tableData: [],//表格数据
+            loadingTable: false,//tablelist的loading
+            inputCode: '',//查询条件
+            titleimageUrl: '',
+            curr_page: 1,//分页，当前页：1
+            pageSizes: [10, 20, 50, 100, 300],//分页，页大小数组
+            curr_pageSize: 10,//分页当前页大小
+            totalnum: 0,//分页，共n条
+            music: { album: '', pic: '', singer: '', tag: '', title: '', url: '', pubTime: '' }
+        },
+        mounted: function mounted() {
+            var url = window.location.search;
+            if (url != "") {
+                var paramsStr = (url.split("="))[1];
+                var params = paramsStr.split(';');
+                this.inputCode = params[0];
+                this.curr_page = parseInt(params[1]);
+                this.curr_pageSize = parseInt(params[2]);
+            }
+            this.getView();
+        },
+        methods: {
+            //获取列表
+            getView: function () {
+                this.loadingTable = true;
+                var condition = this.inputCode; if (this.inputCode.length == 0) { code = ''; }
+                axios.get('GetMusicList?condition=' + condition + '&pageIndex=' + this.curr_page + '&pageSize=' + this.curr_pageSize)
+                    .then(res_total => {
+                        this.totalnum = res_total.data.countnum;
+                        this.tableData = res_total.data.data;
+                        this.loadingTable = false;
+                    }).catch(err_total => { })
+
+            },
+            //条件查询按钮
+            SeleceDate: function () {
+                this.curr_page = 1;
+                this.getView();
+            },
+            //分页 页显示条数改变时
+            handleSizeChange: function (val) {
+                this.curr_pageSize = val;
+                this.getView();
+            },
+            //分页 当前定位页数改变时
+            handleCurrentChange: function (val) {
+                this.curr_page = val;
+                this.getView();
+            },
+            //时间格式化
+            formatTime: function (date) {
+                var date = new Date(date);
+                let o = {
+                    'y+': date.getFullYear(),
+                    'M+': date.getMonth() + 1,
+                    'd+': date.getDate(),
+                    'h+': date.getHours(),
+                    'm+': date.getMinutes(),
+                    's+': date.getSeconds()
+                };
+                for (var i = 1; i < o.length; i++) {
+                    if (o[i].length == 1) {
+                        o[i] = '0' + o[i];
+                    }
+                }
+                if (o["M+"].toString().length == 1) {
+                    o["M+"] = '0' + o["M+"].toString();
+                }
+                if (o["d+"].toString().length == 1) {
+                    o["d+"] = '0' + o["d+"].toString();
+                }
+                if (o["h+"].toString().length == 1) {
+                    o["h+"] = '0' + o["h+"].toString();
+                }
+                if (o["m+"].toString().length == 1) {
+                    o["m+"] = '0' + o["m+"].toString();
+                }
+                if (o["s+"].toString().length == 1) {
+                    o["s+"] = '0' + o["s+"].toString();
+                }
+                return (o["y+"] + '-' + o["M+"] + '-' + o["d+"] + "\n" + o["h+"] + ':' + o["m+"] + ':' + o["s+"]);
+            }
+        }
+    })
+</script>

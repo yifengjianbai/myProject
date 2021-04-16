@@ -104,10 +104,10 @@ namespace OpenAuth.App
         }
 
         /// <summary>
-        /// 删除音乐
+        /// 下架音乐
         /// </summary>
         /// <param name="musics"></param>
-        public int RemoveMusic(List<Music> musics)
+        public int DownMusic(List<Music> musics)
         {
             foreach (var music in musics)
             {
@@ -115,6 +115,28 @@ namespace OpenAuth.App
                 if (mus != null)
                 {
                     mus.Status = -1;
+                }
+            }
+            if (yfjbContext.SaveChanges() > -1)
+            {
+                return 200;
+            }
+            return -1;
+        }
+
+        /// <summary>
+        /// 上架音乐
+        /// </summary>
+        /// <param name="musics"></param>
+        /// <returns></returns>
+        public int UpMusic(List<Music> musics)
+        {
+            foreach (var music in musics)
+            {
+                var mus = yfjbContext.Music.FirstOrDefault(m => m.Id == music.Id);
+                if (mus != null)
+                {
+                    mus.Status = 1;
                 }
             }
             if (yfjbContext.SaveChanges() > -1)
@@ -142,13 +164,13 @@ namespace OpenAuth.App
         /// <param name="pageIndex"></param>
         /// <param name="pageSize"></param>
         /// <returns></returns>
-        public PagingData<Music> GetMusicList(string condition, int pageIndex, int pageSize)
+        public PagingData<Music> GetMusicListAuthor(string condition, int pageIndex, int pageSize)
         {
             var rsp = new PagingData<Music>();
             if (string.IsNullOrEmpty(condition))
             {
-                rsp.Countnum = yfjbContext.Music.Where(m => m.Status == 1).Count();
-                rsp.Data = yfjbContext.Music.Where(m => m.Status == 1).OrderByDescending(m => m.Id)
+                rsp.Countnum = yfjbContext.Music.Count();
+                rsp.Data = yfjbContext.Music.OrderByDescending(m => m.Id)
                     .Skip((pageIndex - 1) * pageSize).Take(pageSize).ToList();
             }
             else
@@ -161,6 +183,42 @@ namespace OpenAuth.App
                                                         || m.Title.Contains(condition)
                                                         || m.Tag.Contains(condition)
                                                         || m.Album.Contains(condition))
+                                            .OrderByDescending(m => m.Id)
+                                            .Skip((pageIndex - 1) * pageSize)
+                                            .Take(pageSize)
+                                            .ToList();
+            }
+            return rsp;
+        }
+
+        /// <summary>
+        /// 查询音乐，模糊查询
+        /// </summary>
+        /// <param name="condition">条件筛选，歌手，标题，标签，专辑</param>
+        /// <param name="pageIndex"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        public PagingData<Music> GetMusicList(string condition, int pageIndex, int pageSize)
+        {
+            var rsp = new PagingData<Music>();
+            if (string.IsNullOrEmpty(condition))
+            {
+                rsp.Countnum = yfjbContext.Music.Where(m => m.Status == 1).Count();
+                rsp.Data = yfjbContext.Music.Where(m => m.Status == 1).OrderByDescending(m => m.Id)
+                    .Skip((pageIndex - 1) * pageSize).Take(pageSize).ToList();
+            }
+            else
+            {
+                rsp.Countnum = yfjbContext.Music.Where(m => m.Status == 1 
+                                                        && (m.Singer.Contains(condition)
+                                                        || m.Title.Contains(condition)
+                                                        || m.Tag.Contains(condition)
+                                                        || m.Album.Contains(condition))).Count();
+                rsp.Data = yfjbContext.Music.Where(m => m.Status == 1 
+                                                        && (m.Singer.Contains(condition)
+                                                        || m.Title.Contains(condition)
+                                                        || m.Tag.Contains(condition)
+                                                        || m.Album.Contains(condition)))
                                             .OrderByDescending(m => m.Id)
                                             .Skip((pageIndex - 1) * pageSize)
                                             .Take(pageSize)
